@@ -1,0 +1,64 @@
+#include <Arduino.h>
+#include <ModbusMaster2.h>                //need to include Modbus Master library
+#include <HardwareSerial.h>
+HardwareSerial Serial3(PC6); //FTDA Serial
+
+HardwareSerial Serial2(PA10, PA9); //rs485
+
+
+#define MAX485_Enable     PC7
+ModbusMaster2 node2;
+
+uint8_t result ;
+uint8_t data [125];
+
+void preTransmission()
+{
+  digitalWrite(MAX485_Enable, 1); //Transmit data
+}
+void postTransmission()
+{
+  digitalWrite(MAX485_Enable, 0); //Receive Data
+}
+void setup ()
+{
+  pinMode(MAX485_Enable, OUTPUT);
+
+  Serial2.begin(9600, SERIAL_8N2);
+  Serial3.begin(9600, SERIAL_8N2);
+
+  //  modem_start ();
+  Serial3.println("setup start");
+
+
+  
+
+}
+
+
+void loop()
+{
+
+    //   Serial3.println("Start");
+     node2.begin(0x01, Serial2);
+
+    node2.preTransmission(preTransmission);
+    node2.postTransmission(postTransmission);
+     
+      result = node2.readHoldingRegisters2(0x0100, 1);
+      
+      Serial3.println(result);
+    
+     if (result == node2.ku8MBSuccess)
+      {
+  
+      Serial3.println(node2.getResponseBuffer2(1));  
+          delay(200);
+       
+    
+      }
+
+ Serial3.println("End");
+
+
+}
